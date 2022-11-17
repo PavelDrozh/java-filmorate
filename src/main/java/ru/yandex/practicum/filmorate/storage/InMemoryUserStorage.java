@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,11 +17,12 @@ import java.util.Map;
 
 @Component
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class InMemoryUserStorage implements UserStorage {
 
-    private final Validator<User> validator;
-    private final Map<Integer, User> users = new HashMap<>();
-    private int userId = 0;
+    final Validator<User> validator;
+    final Map<Integer, User> users = new HashMap<>();
+    int userId = 0;
 
     @Autowired
     public InMemoryUserStorage (Validator<User> validator) {
@@ -30,9 +33,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User create(User user) {
         validator.validate(user);
         if (user.getId() == 0) {
-            user.setId(++userId);
-            users.put(user.getId(), user);
-            log.info("Создание пользователя успешно, пользователь: {}", user);
+            createUser(user);
         } else {
             ValidationException ex =  new ValidationException("Создать нового пользователя с ID невозможно");
             validator.logAndThrowException(ex);
@@ -41,13 +42,17 @@ public class InMemoryUserStorage implements UserStorage {
 
     }
 
+    private void createUser(User user) {
+        user.setId(++userId);
+        users.put(user.getId(), user);
+        log.info("Создание пользователя успешно, пользователь: {}", user);
+    }
+
     @Override
     public User updateOrCreate(User user) {
         validator.validate(user);
         if (user.getId() == 0) {
-            user.setId(++userId);
-            users.put(user.getId(), user);
-            log.info("Создание пользователя успешно, пользователь: {}", user);
+            createUser(user);
         } else if (users.containsKey(user.getId())){
             users.put(user.getId(), user);
             log.info("Обновление пользователя успешно, пользователь: {}", user);

@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -14,10 +16,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InMemoryFilmService implements FilmService {
 
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    FilmStorage filmStorage;
+    UserStorage userStorage;
 
     @Autowired
     public InMemoryFilmService(FilmStorage filmStorage, UserStorage userStorage){
