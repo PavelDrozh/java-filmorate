@@ -6,6 +6,9 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 @Data
 @FieldDefaults(level= AccessLevel.PRIVATE)
 public class Film {
@@ -15,5 +18,6 @@ public class Film {
     String description;
     LocalDate releaseDate;
     int duration;
+    Set<Integer> likes =new LinkedHashSet<>();
 
 }

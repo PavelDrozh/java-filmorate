@@ -1,58 +1,82 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.exceprions.ValidationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.validators.UserValidator;
-import ru.yandex.practicum.filmorate.validators.Validator;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+@Service
 @Slf4j
-public class InMemoryUserService implements Service<User> {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class InMemoryUserService implements UserService {
 
-    private final Validator<User> validator = new UserValidator();
-    private final Map<Integer, User> users = new HashMap<>();
-    private int userId = 0;
+    UserStorage userStorage;
 
+    @Autowired
+    public InMemoryUserService (UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
     @Override
-    public User create(User user) {
-        validator.validate(user);
-        if (user.getId() == 0) {
-            user.setId(++userId);
-            users.put(user.getId(), user);
-            log.info("Создание пользователя успешно, пользователь: {}", user);
-        } else {
-            ValidationException ex =  new ValidationException("Создать нового пользователя с ID невозможно");
-            validator.logAndThrowException(ex);
-        }
-        return user;
+    public User addFriend(int initiatorId, int addedId) {
+        User initiator = getUser(initiatorId);
+        User added = getUser(addedId);
+        updateAddedFriends(initiator, added);
+        updateAddedFriends(added, initiator);
 
+        return initiator;
     }
 
-    @Override
-    public User updateOrCreate(User user) {
-        validator.validate(user);
-        if (user.getId() == 0) {
-            user.setId(++userId);
-            users.put(user.getId(), user);
-            log.info("Создание пользователя успешно, пользователь: {}", user);
-        } else if (users.containsKey(user.getId())){
-            users.put(user.getId(), user);
-            log.info("Обновление пользователя успешно, пользователь: {}", user);
-        } else {
-            ValidationException ex =  new ValidationException("Создать или обновить пользователя не удалось");
-            validator.logAndThrowException(ex);
-        }
+    private static void updateAddedFriends(User initiator, User added) {
+        Set<Integer> newFriendsSet = initiator.getFriends();
+        newFriendsSet.add(added.getId());
+        initiator.setFriends(newFriendsSet);
+    }
+
+    private User getUser(int id) {
+        @NotNull(message = "Пользователей не зарегистрирован")
+        User user = userStorage.getById(id);
         return user;
     }
 
     @Override
-    public List<User> getAll() {
-        log.info("Текущее количество пользователей: {}", users.size());
-        return new ArrayList<>(users.values());
+    public User removeFriend(int initiatorId, int removedId) {
+        User initiator = getUser(initiatorId);
+        User removed = getUser(removedId);
+        updateRemovedFriends(initiator, removed);
+        updateRemovedFriends(removed, initiator);
+
+        return initiator;
+    }
+
+    private static void updateRemovedFriends(User initiator, User removed) {
+        Set<Integer> newFriendsSet = initiator.getFriends();
+        newFriendsSet.remove(removed.getId());
+        initiator.setFriends(newFriendsSet);
+    }
+
+    @Override
+    public List<User> getFriends(int userId) {
+        User user = getUser(userId);
+        return user.getFriends().stream()
+                .map(this::getUser)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> getMutualFriends(int userId, int otherUserId) {
+        User user = getUser(userId);
+        User otherUser = getUser(otherUserId);
+        return user.getFriends().stream()
+                .filter(friend -> otherUser.getFriends().contains(friend))
+                .map(this::getUser)
+                .collect(Collectors.toList());
     }
 }
