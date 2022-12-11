@@ -13,13 +13,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exceprions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceprions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.database.DbFilmService;
 import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
-
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -34,28 +30,12 @@ public class FilmDbServiceTest {
     FilmDbStorage filmStorage;
     UserDbStorage userStorage;
     JdbcTemplate jdbcTemplate;
-
-
-
-    Film film = Film.builder()
-            .name("firstFilm")
-            .description("first description")
-            .duration(25)
-            .releaseDate(LocalDate.of(1999, 11, 23))
-            .mpa(Mpa.builder().id(2).build())
-            .build();
-
-    User user = User.builder()
-            .email("mail@mail.mail")
-            .login("login")
-            .name("Joe")
-            .birthday(LocalDate.of(1994, 8, 14))
-            .build();
+    ResourceSupplier rs;
 
     @BeforeEach
     public void insertFilmUser() {
-        userStorage.create(user);
-        filmStorage.create(film);
+        userStorage.create(rs.getFirstUser());
+        filmStorage.create(rs.getFirstFilm());
     }
 
     @AfterEach

@@ -15,7 +15,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.database.DbUserService;
 import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -31,32 +30,12 @@ public class UserDbServiceTest {
     UserDbStorage userDbStorage;
     DbUserService userService;
     JdbcTemplate jdbcTemplate;
-
-    User user = User.builder()
-            .email("mail@mail.mail")
-            .login("login")
-            .name("Joe")
-            .birthday(LocalDate.of(1994, 8, 14))
-            .build();
-
-    User secondUser = User.builder()
-            .email("secondmail@mail.mail")
-            .login("secondLogin")
-            .name("secondJoe")
-            .birthday(LocalDate.of(2000, 8, 14))
-            .build();
-
-    User thirdUser = User.builder()
-            .email("thirdmail@mail.mail")
-            .login("thirdLogin")
-            .name("thirdJoe")
-            .birthday(LocalDate.of(2005, 8, 14))
-            .build();
+    ResourceSupplier rs;
 
     @BeforeEach
-    public void insertFilmUser() {
-        userDbStorage.create(user);
-        userDbStorage.create(secondUser);
+    public void insertUser() {
+        userDbStorage.create(rs.getFirstUser());
+        userDbStorage.create(rs.getSecondUser());
     }
 
     @AfterEach
@@ -96,24 +75,24 @@ public class UserDbServiceTest {
         assertThat(friends).isNotNull();
         assertThat(friends.size()).isEqualTo(1);
         assertThat(friends.toArray()[0]).isNotNull()
-                .hasFieldOrPropertyWithValue("email", secondUser.getEmail())
-                .hasFieldOrPropertyWithValue("name", secondUser.getName())
-                .hasFieldOrPropertyWithValue("login", secondUser.getLogin())
+                .hasFieldOrPropertyWithValue("email", rs.getSecondUser().getEmail())
+                .hasFieldOrPropertyWithValue("name", rs.getSecondUser().getName())
+                .hasFieldOrPropertyWithValue("login", rs.getSecondUser().getLogin())
                 .hasFieldOrPropertyWithValue("id", 2);
     }
 
     @Test
     public void getMutualFriendsTest() {
-        userDbStorage.create(thirdUser);
+        userDbStorage.create(rs.getThirdUser());
         userService.addFriend(1, 2);
         userService.addFriend(3, 2);
         List<User> mutualFriends = userService.getMutualFriends(1,3);
         assertThat(mutualFriends).isNotNull();
         assertThat(mutualFriends.size()).isEqualTo(1);
         assertThat(mutualFriends.get(0)).isNotNull()
-                .hasFieldOrPropertyWithValue("email", secondUser.getEmail())
-                .hasFieldOrPropertyWithValue("name", secondUser.getName())
-                .hasFieldOrPropertyWithValue("login", secondUser.getLogin())
+                .hasFieldOrPropertyWithValue("email", rs.getSecondUser().getEmail())
+                .hasFieldOrPropertyWithValue("name", rs.getSecondUser().getName())
+                .hasFieldOrPropertyWithValue("login", rs.getSecondUser().getLogin())
                 .hasFieldOrPropertyWithValue("id", 2);
     }
 

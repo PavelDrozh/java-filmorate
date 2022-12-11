@@ -25,6 +25,8 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FilmController {
 
+    private final static String ID_PATH = "/{id}";
+    private final static String LIKES_PATH = "/like/{userId}";
     FilmStorage storage;
     FilmService service;
 
@@ -38,7 +40,7 @@ public class FilmController {
         return storage.getAll();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(ID_PATH)
     public Film getById(@PathVariable int id) {
         return storage.getById(id);
     }
@@ -53,12 +55,12 @@ public class FilmController {
         return storage.updateOrCreate(film);
     }
 
-    @PutMapping("/{id}/like/{userId}")
+    @PutMapping(ID_PATH + LIKES_PATH)
     public Film rateFilm(@PathVariable int id, @PathVariable int userId) {
         return service.likeFilm(id, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
+    @DeleteMapping(ID_PATH + LIKES_PATH)
     public Film removeRate(@PathVariable int id, @PathVariable int userId) {
         return service.removeLike(id, userId);
     }

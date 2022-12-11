@@ -11,11 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exceprions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.database.FilmDbStorage;
-
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +25,7 @@ public class FilmDbStorageTest {
 
     FilmDbStorage filmStorage;
     JdbcTemplate jdbcTemplate;
+    ResourceSupplier rs;
 
     @BeforeEach
     public void rebootTable() {
@@ -44,40 +41,22 @@ public class FilmDbStorageTest {
         jdbcTemplate.update(newTable);
     }
 
-    Film film = Film.builder()
-            .name("firstFilm")
-            .description("first description")
-            .duration(25)
-            .releaseDate(LocalDate.of(1999, 11, 23))
-            .mpa(Mpa.builder().id(2).build())
-            .build();
-
-    Film secondFilm = Film.builder()
-            .name("secondFilm")
-            .description("second description")
-            .duration(45)
-            .releaseDate(LocalDate.of(2001, 3, 15))
-            .mpa(Mpa.builder().id(4).build())
-            .build();
-
-    List<Genre> genres = List.of(Genre.builder().id(1).build(), Genre.builder().id(3).build());
-
     @Test
     public void createFilmTest() {
-        Film created = filmStorage.create(film);
+        Film created = filmStorage.create(rs.getFirstFilm());
         assertThat(created).hasFieldOrPropertyWithValue("id", 1);
     }
 
     @Test
     public void createFilmIsNotExistTest() {
-        Film created = filmStorage.updateOrCreate(film);
+        Film created = filmStorage.updateOrCreate(rs.getFirstFilm());
         assertThat(created).hasFieldOrPropertyWithValue("id", 1);
     }
 
     @Test
     public void updateFilmTest() {
-        Film created = filmStorage.create(film);
-        created.setGenres(genres);
+        Film created = filmStorage.create(rs.getFirstFilm());
+        created.setGenres(rs.getGenres());
         created.setName("newFilmName");
         created.setDescription("newFilmDescription");
         Film updated = filmStorage.updateOrCreate(created);
@@ -92,6 +71,7 @@ public class FilmDbStorageTest {
 
     @Test
     public void updateFilmWithIncorrectIdTest() {
+        Film film = rs.getFirstFilm();
         film.setId(1000);
         assertThatThrownBy(() -> filmStorage.updateOrCreate(film))
                 .isInstanceOf(FilmNotFoundException.class);
@@ -99,8 +79,8 @@ public class FilmDbStorageTest {
 
     @Test
     public void getAllFilmsTest() {
-        filmStorage.create(film);
-        filmStorage.create(secondFilm);
+        filmStorage.create(rs.getFirstFilm());
+        filmStorage.create(rs.getSecondFilm());
 
         List<Film> films = filmStorage.getAll();
         assertThat(films.size()).isEqualTo(2);
@@ -110,8 +90,8 @@ public class FilmDbStorageTest {
 
     @Test
     public void getByIdTest() {
-        filmStorage.create(film);
-        filmStorage.create(secondFilm);
+        filmStorage.create(rs.getFirstFilm());
+        filmStorage.create(rs.getSecondFilm());
 
         Film film = filmStorage.getById(2);
         assertThat(film).isNotNull()
@@ -125,8 +105,8 @@ public class FilmDbStorageTest {
 
     @Test
     public void getBestTest() {
-        filmStorage.create(film);
-        filmStorage.create(secondFilm);
+        filmStorage.create(rs.getFirstFilm());
+        filmStorage.create(rs.getSecondFilm());
 
         List<Film> films = filmStorage.getBest(10);
         assertThat(films).isNotNull();

@@ -27,6 +27,10 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
 
+    private final static String ID_PATH = "/{id}";
+    private final static String FRIENDS_PATH = "/friends";
+    private final static String FRIENDS_ID_PATH = "/{friendId}";
+
     UserStorage storage;
     UserService service;
     @Autowired
@@ -40,11 +44,6 @@ public class UserController {
         return storage.getAll();
     }
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable int id) {
-        return storage.getById(id);
-    }
-
     @PostMapping
     public User create(@RequestBody @NotNull User user) {
         return storage.create(user);
@@ -55,22 +54,27 @@ public class UserController {
         return storage.updateOrCreate(user);
     }
 
-    @PutMapping("/{id}/friends/{friendId}")
+    @GetMapping(ID_PATH)
+    public User getUserById(@PathVariable int id) {
+        return storage.getById(id);
+    }
+
+    @PutMapping(ID_PATH + FRIENDS_PATH + FRIENDS_ID_PATH)
     public User addFriend(@PathVariable int friendId, @PathVariable int id) {
         return service.addFriend(id, friendId);
     }
 
-    @DeleteMapping("/{id}/friends/{friendId}")
+    @DeleteMapping(ID_PATH + FRIENDS_PATH + FRIENDS_ID_PATH)
     public User deleteFriend(@PathVariable int friendId, @PathVariable int id) {
         return service.removeFriend(id, friendId);
     }
 
-    @GetMapping("/{id}/friends")
+    @GetMapping(ID_PATH + FRIENDS_PATH)
     public Set<User> getFriends(@PathVariable int id) {
         return service.getFriends(id);
     }
 
-    @GetMapping("/{id}/friends/common/{otherId}")
+    @GetMapping(ID_PATH + FRIENDS_PATH + "/common/{otherId}")
     public List<User> getMutualFriends(@PathVariable int id, @PathVariable int otherId) {
         return service.getMutualFriends(id, otherId);
     }

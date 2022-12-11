@@ -23,23 +23,18 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 public class MpaDbStorageTest {
 
     MpaDbStorage mpaDbStorage;
-
-    List<Mpa> expectedMpa = List.of(Mpa.builder().id(1).name("G").build(),
-            Mpa.builder().id(2).name("PG").build(),
-            Mpa.builder().id(3).name("PG-13").build(),
-            Mpa.builder().id(4).name("R").build(),
-            Mpa.builder().id(5).name("NC-17").build());
+    ResourceSupplier rs;
 
     @Test
     public void getAllMpaTest() {
         List<Mpa> realMpa = mpaDbStorage.getAll();
-        assertThat(realMpa).isEqualTo(expectedMpa);
+        assertThat(realMpa).isEqualTo(rs.getExpectedMpa());
     }
 
     @Test
     public void getMpaByIdTest() {
         Mpa realMpa = mpaDbStorage.getById(3);
-        assertThat(realMpa).isEqualTo(expectedMpa.get(2));
+        assertThat(realMpa).isEqualTo(rs.getExpectedMpa().get(2));
     }
 
     @Test

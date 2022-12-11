@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.exceprions.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.database.UserDbStorage;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,20 +26,7 @@ public class UserDbStorageTest {
 
      UserDbStorage userDbStorage;
      JdbcTemplate jdbcTemplate;
-
-     User user = User.builder()
-            .email("mail@mail.mail")
-            .login("login")
-            .name("Joe")
-            .birthday(LocalDate.of(1994, 8, 14))
-            .build();
-
-    User secondUser = User.builder()
-            .email("secondmail@mail.mail")
-            .login("secondLogin")
-            .name("secondJoe")
-            .birthday(LocalDate.of(2000, 8, 14))
-            .build();
+    ResourceSupplier rs;
 
     @AfterEach
     public void rebootTable() {
@@ -57,18 +43,19 @@ public class UserDbStorageTest {
 
     @Test
     public void createUserTest() {
-        User created = userDbStorage.create(user);
+        User created = userDbStorage.create(rs.getFirstUser());
         assertThat(created).hasFieldOrPropertyWithValue("id", 1);
     }
 
     @Test
     public void createUserIfNotExistTest() {
-        User created = userDbStorage.updateOrCreate(user);
+        User created = userDbStorage.updateOrCreate(rs.getFirstUser());
         assertThat(created).hasFieldOrPropertyWithValue("id", 1);
     }
 
     @Test
     public void updateUserTest() {
+        User user = rs.getFirstUser();
         userDbStorage.create(user);
 
         user.setId(1);
@@ -87,6 +74,7 @@ public class UserDbStorageTest {
 
     @Test
     public void updateUserWithIncorrectIdTest() {
+        User user = rs.getFirstUser();
         user.setId(1000);
         assertThatThrownBy(() -> userDbStorage.updateOrCreate(user))
                 .isInstanceOf(UserNotFoundException.class);
@@ -94,17 +82,17 @@ public class UserDbStorageTest {
 
     @Test
     public void findUserByIdTest() {
-        userDbStorage.create(user);
-        User FROMDb = userDbStorage.getById(1);
-        assertThat(FROMDb).hasFieldOrPropertyWithValue("id", 1);
+        userDbStorage.create(rs.getFirstUser());
+        User fromDb = userDbStorage.getById(1);
+        assertThat(fromDb).hasFieldOrPropertyWithValue("id", 1);
     }
 
     @Test
     public void findAllUsersTest() {
-        userDbStorage.create(user);
-        userDbStorage.create(secondUser);
-        List<User> FROMDb = userDbStorage.getAll();
-        assertThat(FROMDb.size()).isEqualTo(2);
-        FROMDb.forEach(user -> assertThat(user).isInstanceOf(User.class).isNotNull());
+        userDbStorage.create(rs.getFirstUser());
+        userDbStorage.create(rs.getSecondUser());
+        List<User> fromDb = userDbStorage.getAll();
+        assertThat(fromDb.size()).isEqualTo(2);
+        fromDb.forEach(user -> assertThat(user).isInstanceOf(User.class).isNotNull());
     }
 }
