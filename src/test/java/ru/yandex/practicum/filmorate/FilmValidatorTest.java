@@ -24,11 +24,12 @@ public class FilmValidatorTest {
 
     @BeforeEach
     void setFilm() {
-        film = new Film();
-        film.setName(NORMAL_NAME);
-        film.setDescription(NORMAL_DESCRIPTION);
-        film.setReleaseDate(FilmValidator.EARLIER_RELEASE_DATE);
-        film.setDuration(NORMAL_DURATION);
+        film = Film.builder()
+                .name(NORMAL_NAME)
+                .description(NORMAL_DESCRIPTION)
+                .releaseDate(FilmValidator.EARLIER_RELEASE_DATE)
+                .duration(NORMAL_DURATION)
+                .build();
     }
 
     @Test

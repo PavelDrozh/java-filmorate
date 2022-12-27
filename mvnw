@@ -165,7 +165,7 @@ fi
 
 CLASSWORLDS_LAUNCHER=org.codehaus.plexus.classworlds.launcher.Launcher
 
-# traverses directory structure from process work directory to filesystem root
+# traverses directory structure FROM process work directory to filesystem root
 # first directory with .mvn subdirectory is considered project base directory
 find_maven_basedir() {
 
@@ -204,7 +204,7 @@ if [ -z "$BASE_DIR" ]; then
 fi
 
 ##########################################################################################
-# Extension to allow automatically downloading the maven-wrapper.jar from Maven-central
+# Extension to allow automatically downloading the maven-wrapper.jar FROM Maven-central
 # This allows using the maven wrapper in projects that prohibit checking in binary data.
 ##########################################################################################
 if [ -r "$BASE_DIR/.mvn/wrapper/maven-wrapper.jar" ]; then
@@ -225,7 +225,7 @@ else
       esac
     done < "$BASE_DIR/.mvn/wrapper/maven-wrapper.properties"
     if [ "$MVNW_VERBOSE" = true ]; then
-      echo "Downloading from: $jarUrl"
+      echo "Downloading FROM: $jarUrl"
     fi
     wrapperJarPath="$BASE_DIR/.mvn/wrapper/maven-wrapper.jar"
     if $cygwin; then
