@@ -86,7 +86,7 @@ public class UserValidatorTest {
 
     //Если тест не проходит - проверить первую дату, т.к. это проверка граничного уловия от LocalDate.now().
     @ParameterizedTest(name = "{index}. Проверка невалидности даты рождения \"{arguments}\"")
-    @ValueSource(strings = {"2023-11-18", "2023-01-01", "2089-12-27"})
+    @ValueSource(strings = {"2023-11-18", "2023-12-12", "2089-12-27"})
     void validateReleaseDate(String date) {
         LocalDate parseDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         user.setBirthday(parseDate);
