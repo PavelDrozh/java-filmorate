@@ -19,7 +19,6 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/films")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
