@@ -19,14 +19,13 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/films")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FilmController {
 
-    private final static String ID_PATH = "/{id}";
-    private final static String LIKES_PATH = "/like/{userId}";
+    private static final String ID_PATH = "/{id}";
+    private static final String LIKES_PATH = "/like/{userId}";
     FilmStorage storage;
     FilmService service;
 
@@ -35,6 +34,7 @@ public class FilmController {
         this.storage = storage;
         this.service = service;
     }
+
     @GetMapping
     public List<Film> findAll() {
         return storage.getAll();

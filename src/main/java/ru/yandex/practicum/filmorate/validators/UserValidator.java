@@ -27,7 +27,7 @@ public class UserValidator implements Validator<User> {
         if (user.getLogin().contains(" ")) {
             logAndThrowException(new ValidationException("Логин не должен содержать пробелов"));
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
+        if (user.getBirthday().isAfter(LocalDate.now()) || user.getBirthday().isEqual(LocalDate.now())) {
             logAndThrowException(new ValidationException("День рождения не может быть в будущем"));
         }
         if (user.getName() == null || user.getName().isBlank()) {
