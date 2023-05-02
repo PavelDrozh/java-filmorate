@@ -1,0 +1,1152 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Filmorate main service API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "description": "Generated server url",
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "description": "API для работы с фильмами",
+      "name": "Фильмы"
+    },
+    {
+      "description": "API для работы с пользователями",
+      "name": "Пользователи"
+    },
+    {
+      "description": "API для работы с жанрами",
+      "name": "Жанры"
+    },
+    {
+      "description": "API для работы с возрастным рейтингом",
+      "name": "Рейтинги"
+    }
+  ],
+  "paths": {
+    "/films": {
+      "get": {
+        "operationId": "getAllFilms",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Film"
+                  }
+                }
+              }
+            },
+            "description": "Фильмы найдены"
+          }
+        },
+        "summary": "Поиск всех фильмов",
+        "description": "При наличии фильмов в БД выводит список найденных фильмов, в случае их отсутствия - пустой список",
+        "tags": [
+          "Фильмы"
+        ]
+      },
+      "post": {
+        "operationId": "createFilm",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Film"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            },
+            "description": "Фильм добавлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "BAD_REQUEST",
+                  "message": "Отсутствует имя фильма"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          }
+        },
+        "summary": "Добавление нового фильма",
+        "description": "Ограничения при добавлении нового фильма: должны быть заполнены все поля (кроме ID и лайков), ID должен отсутствовать (равен 0), дата релиза не ранее 28.12.1895, описание не больше 200 символов",
+        "tags": [
+          "Фильмы"
+        ]
+      },
+      "put": {
+        "operationId": "createOrUpdateFilm",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Film"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            },
+            "description": "Фильм добавлен или обновлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "BAD_REQUEST",
+                  "message": "Отсутствует имя фильма"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Создать или обновить фильм не удалось"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Создать или обновить фильм не удалось"
+          }
+        },
+        "summary": "Добавление или обновление фильма",
+        "description": "Обноление фильма происходит, если в базе есть фильм с ID соответствующий переданному в теле запроса. При передаче тела с Id = 0 создается новый фильм, ограничения сохраняются",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/films/{id}": {
+      "get": {
+        "operationId": "getFilmById",
+        "parameters": [
+          {
+            "description": "id Фильма",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            },
+            "description": "Фильм найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Фильма с id = 5 нет в базе данных"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Создать или обновить фильм не удалось"
+          }
+        },
+        "summary": "Поиск фильма по ID",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/films/{id}/like/{userId}": {
+      "put": {
+        "operationId": "rateFilm",
+        "parameters": [
+          {
+            "description": "id Фильма",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "id Пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            },
+            "description": "Лайк успешно добавлен"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Фильма с id = 5 нет в базе данных"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Добавление лайка не удалось"
+          }
+        },
+        "summary": "Добавление лайка фильму от пользователя",
+        "tags": [
+          "Фильмы"
+        ]
+      },
+      "delete": {
+        "operationId": "removeRateFilm",
+        "parameters": [
+          {
+            "description": "id Фильма",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "id Пользователя",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Film"
+                }
+              }
+            },
+            "description": "Лайк успешно удален"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Фильма с id = 5 нет в базе данных"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Удаление лайка не удалось"
+          }
+        },
+        "summary": "Удаление лайка фильма",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/films/popular": {
+      "get": {
+        "operationId": "getPopularFilms",
+        "parameters": [
+          {
+            "description": "количество фильмов",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "example": 4,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Film"
+                  }
+                }
+              }
+            },
+            "description": "Фильмы найдены"
+          }
+        },
+        "summary": "Поиск самых популярных фильмов",
+        "description": "При наличии фильмов в БД выводит список заданного размера (или меньше, в зависимости от количества фильмов в БД) найденных фильмов с сортировкой по количеству лайков, в случае их отсутствия - пустой список",
+        "tags": [
+          "Фильмы"
+        ]
+      }
+    },
+    "/genres": {
+      "get": {
+        "operationId": "getAllGenres",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Genre"
+                  }
+                }
+              }
+            },
+            "description": "Жанры найдены"
+          }
+        },
+        "summary": "Поиск всех жанров",
+        "description": "В БД изначально записывается 6 жанров. Возможности добавления нет",
+        "tags": [
+          "Жанры"
+        ]
+      }
+    },
+    "/genres/{id}": {
+      "get": {
+        "operationId": "getGenreById",
+        "parameters": [
+          {
+            "description": "id Жанра",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Genre"
+                  }
+                }
+              }
+            },
+            "description": "Жанр найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Genre с id = 7 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Найти жанр не удалось"
+          }
+        },
+        "summary": "Поиск жанра по ID",
+        "description": "В БД изначально записывается 6 жанров. Возможности добавления нет",
+        "tags": [
+          "Жанры"
+        ]
+      }
+    },
+    "/mpa": {
+      "get": {
+        "operationId": "getAllMpa",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Mpa"
+                  }
+                }
+              }
+            },
+            "description": "Рейтинги найдены"
+          }
+        },
+        "summary": "Поиск всех Рейтингов",
+        "description": "В БД изначально записывается 5 рейтингов. Возможности добавления нет",
+        "tags": [
+          "Рейтинги"
+        ]
+      }
+    },
+    "/mpa/{id}": {
+      "get": {
+        "operationId": "getMpaById",
+        "parameters": [
+          {
+            "description": "id Рейтинга",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Mpa"
+                  }
+                }
+              }
+            },
+            "description": "Рейтинг найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "MPA с id = 6 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Найти рейтинг не удалось"
+          }
+        },
+        "summary": "Поиск рейтинга по ID",
+        "description": "В БД изначально записывается 5 рейтингов. Возможности добавления нет",
+        "tags": [
+          "Рейтинги"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "description": "Пользователи найдены"
+          }
+        },
+        "summary": "Поиск всех пользователей",
+        "description": "При наличии пользователей в БД выводит список найденных, в случае их отсутствия - пустой список",
+        "tags": [
+          "Пользователи"
+        ]
+      },
+      "post": {
+        "operationId": "createUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Пользователь добавлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "BAD_REQUEST",
+                  "message": "Отсутствует почта"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          }
+        },
+        "summary": "Добавление нового Пользователя",
+        "description": "Ограничения при добавлении нового фильма: должны быть заполнены все поля (кроме ID и друзей), ID должен отсутствовать (равен 0), дата рождения не ранее текущего времени, формат email",
+        "tags": [
+          "Пользователи"
+        ]
+      },
+      "put": {
+        "operationId": "createOrUpdateFilm",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Фильм добавлен или обновлен"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "BAD_REQUEST",
+                  "message": "Отсутствует почта"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Создать или обновить пользователя не удалось"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Создать или обновить пользователя не удалось"
+          }
+        },
+        "summary": "Добавление или обновление пользователя",
+        "description": "Обноление пользователя происходит, если в базе есть пользователь с ID соответствующий переданному в теле запроса. При передаче тела с Id = 0 создается новый пользователь, ограничения сохраняются",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "description": "id Пользователя",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "description": "Пользователь найден"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Пользователь с id = 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Найти пользователя не удалось"
+          }
+        },
+        "summary": "Поиск пользователя по ID",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    },
+    "/users/{id}/friends/{friendId}": {
+      "put": {
+        "operationId": "addFriend",
+        "parameters": [
+          {
+            "description": "id Пользователя",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "id Пользователя - друга",
+            "in": "path",
+            "name": "friendId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Друг успешно добавлен"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Пользователь с id = 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Добавление друга не удалось"
+          }
+        },
+        "summary": "Добавление пользователя в друзья",
+        "tags": [
+          "Пользователи"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteFriend",
+        "parameters": [
+          {
+            "description": "id Пользователя",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "id Пользователя - друга",
+            "in": "path",
+            "name": "friendId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Друг успешно удален"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Пользователь с id = 5 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Удаление друга не удалось"
+          }
+        },
+        "summary": "Удаление пользователя из списка друзей",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    },
+    "/users/{id}/friends": {
+      "get": {
+        "operationId": "getUsersFriends",
+        "parameters": [
+          {
+            "description": "id Пользователя",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "description": "Пользователи найдены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Пользователь с id = 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Найти пользователя не удалось"
+          }
+        },
+        "summary": "Поиск друзей пользователя по ID",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    },
+    "/users/{id}/friends/common/{otherId}": {
+      "get": {
+        "operationId": "getMutualFriends",
+        "parameters": [
+          {
+            "description": "id Пользователя",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "description": "id Другого Пользователя",
+            "in": "path",
+            "name": "otherId",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "description": "Пользователи найдены"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "NOT_FOUND",
+                  "message": "Пользователь с id = 10 не найден"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Найти пользователя не удалось"
+          }
+        },
+        "summary": "Поиск общих друзей пользователей по их ID",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Сообщение об ошибке",
+            "example": "Only pending or canceled events can be changed"
+          },
+          "status": {
+            "type": "string",
+            "description": "Код статуса HTTP-ответа",
+            "example": "FORBIDDEN",
+            "enum": [
+              "100 CONTINUE",
+              "101 SWITCHING_PROTOCOLS",
+              "102 PROCESSING",
+              "103 CHECKPOINT",
+              "200 OK",
+              "201 CREATED",
+              "202 ACCEPTED",
+              "203 NON_AUTHORITATIVE_INFORMATION",
+              "204 NO_CONTENT",
+              "205 RESET_CONTENT",
+              "206 PARTIAL_CONTENT",
+              "207 MULTI_STATUS",
+              "208 ALREADY_REPORTED",
+              "226 IM_USED",
+              "300 MULTIPLE_CHOICES",
+              "301 MOVED_PERMANENTLY",
+              "302 FOUND",
+              "302 MOVED_TEMPORARILY",
+              "303 SEE_OTHER",
+              "304 NOT_MODIFIED",
+              "305 USE_PROXY",
+              "307 TEMPORARY_REDIRECT",
+              "308 PERMANENT_REDIRECT",
+              "400 BAD_REQUEST",
+              "401 UNAUTHORIZED",
+              "402 PAYMENT_REQUIRED",
+              "403 FORBIDDEN",
+              "404 NOT_FOUND",
+              "405 METHOD_NOT_ALLOWED",
+              "406 NOT_ACCEPTABLE",
+              "407 PROXY_AUTHENTICATION_REQUIRED",
+              "408 REQUEST_TIMEOUT",
+              "409 CONFLICT",
+              "410 GONE",
+              "411 LENGTH_REQUIRED",
+              "412 PRECONDITION_FAILED",
+              "413 PAYLOAD_TOO_LARGE",
+              "413 REQUEST_ENTITY_TOO_LARGE",
+              "414 URI_TOO_LONG",
+              "414 REQUEST_URI_TOO_LONG",
+              "415 UNSUPPORTED_MEDIA_TYPE",
+              "416 REQUESTED_RANGE_NOT_SATISFIABLE",
+              "417 EXPECTATION_FAILED",
+              "418 I_AM_A_TEAPOT",
+              "419 INSUFFICIENT_SPACE_ON_RESOURCE",
+              "420 METHOD_FAILURE",
+              "421 DESTINATION_LOCKED",
+              "422 UNPROCESSABLE_ENTITY",
+              "423 LOCKED",
+              "424 FAILED_DEPENDENCY",
+              "425 TOO_EARLY",
+              "426 UPGRADE_REQUIRED",
+              "428 PRECONDITION_REQUIRED",
+              "429 TOO_MANY_REQUESTS",
+              "431 REQUEST_HEADER_FIELDS_TOO_LARGE",
+              "451 UNAVAILABLE_FOR_LEGAL_REASONS",
+              "500 INTERNAL_SERVER_ERROR",
+              "501 NOT_IMPLEMENTED",
+              "502 BAD_GATEWAY",
+              "503 SERVICE_UNAVAILABLE",
+              "504 GATEWAY_TIMEOUT",
+              "505 HTTP_VERSION_NOT_SUPPORTED",
+              "506 VARIANT_ALSO_NEGOTIATES",
+              "507 INSUFFICIENT_STORAGE",
+              "508 LOOP_DETECTED",
+              "509 BANDWIDTH_LIMIT_EXCEEDED",
+              "510 NOT_EXTENDED",
+              "511 NETWORK_AUTHENTICATION_REQUIRED"
+            ]
+          }
+        },
+        "description": "Сведения об ошибке"
+      },
+      "Film": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int64",
+            "readOnly": true,
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Наименование фильма",
+            "example": "Очень страшное кино"
+          },
+          "description": {
+            "type": "string",
+            "description": "Полное описание фильма",
+            "example": "Фильм-пародия на известные фильмы современности"
+          },
+          "releaseDate": {
+            "type": "string",
+            "description": "Дата выпуска фильма (в формате \"yyyy-MM-dd\")",
+            "example": "2022-06-09"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Длительность фильма",
+            "format": "int32",
+            "example": 120
+          },
+          "likes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Длительность фильма",
+              "format": "int32",
+              "example": 120
+            },
+            "description": "Кто лайкнул фильм",
+            "example": [
+              12,
+              120,
+              15
+            ]
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Genre"
+            },
+            "description": "Жанры к которым относится фильм"
+          },
+          "mpa": {
+            "$ref": "#/components/schemas/Mpa"
+          }
+        },
+        "description": "Фильм"
+      },
+      "Genre": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int64",
+            "readOnly": true,
+            "example": 1,
+            "maximum": 6
+          },
+          "name": {
+            "type": "string",
+            "description": "Наименование жанра",
+            "example": "Комедия",
+            "enum": [
+              "Комедия",
+              "Драма",
+              "Мультфильм",
+              "Триллер",
+              "Документальный",
+              "Боевик"
+            ]
+          }
+        }
+      },
+      "Mpa": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int64",
+            "readOnly": true,
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Код возрастного рейтинга",
+            "example": "NC-17",
+            "enum": [
+              "G",
+              "PG",
+              "PG-13",
+              "R",
+              "Документальный",
+              "NC-17"
+            ]
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Идентификатор",
+            "format": "int64",
+            "readOnly": true,
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Имя пользователя",
+            "example": "Петр"
+          },
+          "login": {
+            "type": "string",
+            "description": "Логин пользователя",
+            "example": "Петр Первый"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email пользователя",
+            "example": "petr@yandex.ru"
+          },
+          "birthday": {
+            "type": "string",
+            "description": "Дата рождения пользователя (в формате \"yyyy-MM-dd\")",
+            "example": "2001-06-09"
+          },
+          "friends": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "ID пользователей - друзей",
+              "format": "int32",
+              "example": 1
+            },
+            "description": "Друзья",
+            "example": [
+              12,
+              11,
+              15
+            ]
+          }
+        },
+        "description": "Пользователи"
+      }
+    }
+  }
+}
